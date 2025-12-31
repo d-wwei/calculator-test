@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #0a0a0a;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
+            padding: 20px;
+        }
+
+        .calculator {
+            background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .display {
+            background: linear-gradient(145deg, #000000, #1a1a1a);
+            color: #00ff88;
+            font-size: 2.5rem;
+            padding: 20px;
+            text-align: right;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            max-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            overflow-x: auto;
+            overflow-y: hidden;
+            font-weight: 300;
+            box-shadow: 
+                inset 0 2px 10px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .display::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .display::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+        
+        .display::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 136, 0.5);
+            border-radius: 3px;
+        }
+        
+        .display::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 136, 0.7);
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        button {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            font-size: 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #e0e0e0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.3) 40%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        button:active::before {
+            width: 300px;
+            height: 300px;
+            opacity: 1;
+            transition: width 0s, height 0s, opacity 0.1s;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 60%);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease-out, height 0.3s ease-out, opacity 0.3s;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        button:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 1;
+            transition: width 0s, height 0s, opacity 0.05s;
+        }
+
+        button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        button:hover {
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.8),
+                inset 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .operator {
+            background: linear-gradient(145deg, #ff6b35, #ff4500);
+            color: white;
+            border-color: rgba(255, 107, 53, 0.3);
+            box-shadow: 
+                0 4px 15px rgba(255, 107, 53, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .operator::before {
+            background: radial-gradient(circle, rgba(255, 200, 100, 0.6) 0%, rgba(255, 150, 50, 0.4) 40%, transparent 70%);
+        }
+
+        .operator::after {
+            background: radial-gradient(circle, rgba(255, 220, 150, 0.9) 0%, transparent 60%);
+        }
+
+        .operator:hover {
+            background: linear-gradient(145deg, #ff7b45, #ff5500);
+            box-shadow: 
+                0 6px 20px rgba(255, 107, 53, 0.5),
+                0 0 30px rgba(255, 107, 53, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .clear {
+            background: linear-gradient(145deg, #4a4a4a, #2a2a2a);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .clear:hover {
+            background: linear-gradient(145deg, #5a5a5a, #3a3a3a);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .equals {
+            background: linear-gradient(145deg, #00ff88, #00cc6a);
+            color: #000;
+            border-color: rgba(0, 255, 136, 0.3);
+            box-shadow: 
+                0 4px 15px rgba(0, 255, 136, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .equals::before {
+            background: radial-gradient(circle, rgba(0, 255, 200, 0.6) 0%, rgba(0, 255, 136, 0.4) 40%, transparent 70%);
+        }
+
+        .equals::after {
+            background: radial-gradient(circle, rgba(0, 255, 220, 0.9) 0%, transparent 60%);
+        }
+
+        .equals:hover {
+            background: linear-gradient(145deg, #00ff98, #00dd7a);
+            box-shadow: 
+                0 6px 20px rgba(0, 255, 136, 0.5),
+                0 0 30px rgba(0, 255, 136, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+        
+        .scientific-btn {
+            background: linear-gradient(145deg, #3a2a4a, #2a1a3a);
+            color: #b8a0ff;
+            border-color: rgba(184, 160, 255, 0.3);
+            box-shadow: 
+                0 4px 15px rgba(184, 160, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            font-size: 1.2rem;
+        }
+        
+        .scientific-btn::before {
+            background: radial-gradient(circle, rgba(184, 160, 255, 0.6) 0%, rgba(150, 120, 255, 0.4) 40%, transparent 70%);
+        }
+        
+        .scientific-btn::after {
+            background: radial-gradient(circle, rgba(200, 180, 255, 0.9) 0%, transparent 60%);
+        }
+        
+        .scientific-btn:hover {
+            background: linear-gradient(145deg, #4a3a5a, #3a2a4a);
+            box-shadow: 
+                0 6px 20px rgba(184, 160, 255, 0.4),
+                0 0 30px rgba(184, 160, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            border-color: rgba(184, 160, 255, 0.5);
+        }
+        
+        .scientific-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .history-btn {
+            background: linear-gradient(145deg, #5a5aff, #3a3aff);
+            color: white;
+            margin-bottom: 15px;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 1px solid rgba(90, 90, 255, 0.3);
+            box-shadow: 
+                0 4px 15px rgba(90, 90, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .history-btn::before {
+            background: radial-gradient(circle, rgba(150, 150, 255, 0.6) 0%, rgba(90, 90, 255, 0.4) 40%, transparent 70%);
+        }
+
+        .history-btn::after {
+            background: radial-gradient(circle, rgba(180, 180, 255, 0.9) 0%, transparent 60%);
+        }
+
+        .history-btn:hover {
+            background: linear-gradient(145deg, #6a6aff, #4a4aff);
+            box-shadow: 
+                0 6px 20px rgba(90, 90, 255, 0.5),
+                0 0 30px rgba(90, 90, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .history-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 100vh;
+            background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .history-panel.show {
+            display: block;
+            transform: translateX(0);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .history-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .close-btn {
+            background: linear-gradient(145deg, #ff3b30, #cc2e24);
+            color: white;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(255, 59, 48, 0.3);
+        }
+
+        .close-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 150, 150, 0.6) 0%, rgba(255, 100, 100, 0.4) 40%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        .close-btn:active::before {
+            width: 300px;
+            height: 300px;
+            opacity: 1;
+            transition: width 0s, height 0s, opacity 0.1s;
+        }
+
+        .close-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 180, 180, 0.9) 0%, transparent 60%);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease-out, height 0.3s ease-out, opacity 0.3s;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        .close-btn:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 1;
+            transition: width 0s, height 0s, opacity 0.05s;
+        }
+
+        .close-btn:hover {
+            background: linear-gradient(145deg, #ff4b40, #dd3e34);
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.5);
+        }
+
+        .clear-history-btn {
+            background: linear-gradient(145deg, #4a4a4a, #2a2a2a);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .clear-history-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(200, 200, 200, 0.3) 40%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        .clear-history-btn:active::before {
+            width: 300px;
+            height: 300px;
+            opacity: 1;
+            transition: width 0s, height 0s, opacity 0.1s;
+        }
+
+        .clear-history-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 60%);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease-out, height 0.3s ease-out, opacity 0.3s;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        .clear-history-btn:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 1;
+            transition: width 0s, height 0s, opacity 0.05s;
+        }
+
+        .clear-history-btn:hover {
+            background: linear-gradient(145deg, #5a5a5a, #3a3a3a);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+        }
+
+        .history-item {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid #5a5aff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .history-item:hover {
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(90, 90, 255, 0.3);
+            border-left-color: #5a5aff;
+        }
+
+        .history-expression {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .history-result {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #00ff88;
+            text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+            font-size: 1rem;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+        
+        .stats-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100vh;
+            background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            overflow-y: auto;
+            padding: 20px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stats-panel.show {
+            display: block;
+            transform: translateX(0);
+        }
+        
+        .stats-item {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .stats-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .stats-button-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #00ff88;
+            text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+        }
+        
+        .stats-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #5a5aff;
+            text-shadow: 0 0 10px rgba(90, 90, 255, 0.5);
+        }
+        
+        .stats-details {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 8px;
+        }
+        
+        .stats-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .stats-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #5a5aff, #00ff88);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 480px) {
+            .history-panel {
+                width: 100%;
+            }
+            .calculator {
+                padding: 20px;
+            }
+
+            .display {
+                font-size: 2rem;
+                padding: 15px;
+            }
+
+            button {
+                padding: 20px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay" onclick="closeHistory(); closeStats();"></div>
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <div class="history-title">计算历史</div>
+            <button class="close-btn" onclick="closeHistory()"><span>✕</span></button>
+        </div>
+        <button class="clear-history-btn" onclick="clearHistory()"><span>清除所有历史</span></button>
+        <div id="historyList"></div>
+    </div>
+    <div class="stats-panel" id="statsPanel">
+        <div class="history-header">
+            <div class="history-title">点击统计</div>
+            <button class="close-btn" onclick="closeStats()"><span>✕</span></button>
+        </div>
+        <button class="clear-history-btn" onclick="clearClickStats()"><span>清除统计数据</span></button>
+        <div id="statsList"></div>
+    </div>
+    <div class="calculator">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <button class="history-btn" onclick="toggleHistory()" style="margin-bottom: 0; flex: 1; min-width: 120px;"><span>📜 查看历史记录</span></button>
+            <button class="history-btn" id="modeBtn" onclick="toggleMode()" style="margin-bottom: 0; flex: 1; min-width: 120px;"><span>🔬 科学模式</span></button>
+            <button class="history-btn" onclick="toggleStats()" style="margin-bottom: 0; flex: 1; min-width: 120px;"><span>📊 查看点击统计</span></button>
+        </div>
+        <div class="display" id="display">0</div>
+        <div class="buttons" id="simple-buttons">
+            <button class="clear" onclick="clearDisplay()"><span>C</span></button>
+            <button class="clear" onclick="clearEntry()"><span>CE</span></button>
+            <button class="operator" onclick="appendOperator('/')"><span>÷</span></button>
+            <button class="operator" onclick="appendOperator('*')"><span>×</span></button>
+            
+            <button onclick="appendNumber('7')"><span>7</span></button>
+            <button onclick="appendNumber('8')"><span>8</span></button>
+            <button onclick="appendNumber('9')"><span>9</span></button>
+            <button class="operator" onclick="appendOperator('-')"><span>−</span></button>
+            
+            <button onclick="appendNumber('4')"><span>4</span></button>
+            <button onclick="appendNumber('5')"><span>5</span></button>
+            <button onclick="appendNumber('6')"><span>6</span></button>
+            <button class="operator" onclick="appendOperator('+')"><span>+</span></button>
+            
+            <button onclick="appendNumber('1')"><span>1</span></button>
+            <button onclick="appendNumber('2')"><span>2</span></button>
+            <button onclick="appendNumber('3')"><span>3</span></button>
+            <button class="operator" onclick="appendOperator('**')" style="font-size: 1.2rem;"><span>x²</span></button>
+            
+            <button class="zero" onclick="appendNumber('0')"><span>0</span></button>
+            <button onclick="appendDecimal()"><span>.</span></button>
+            <button class="equals" onclick="calculate()"><span>=</span></button>
+        </div>
+        <div class="buttons scientific-buttons" id="scientific-buttons" style="display: none; grid-template-columns: repeat(5, 1fr);">
+            <button class="scientific-btn" onclick="appendFunction('sin')"><span>sin</span></button>
+            <button class="scientific-btn" onclick="appendFunction('cos')"><span>cos</span></button>
+            <button class="scientific-btn" onclick="appendFunction('tan')"><span>tan</span></button>
+            <button class="scientific-btn" onclick="appendFunction('log')"><span>log</span></button>
+            <button class="scientific-btn" onclick="appendFunction('ln')"><span>ln</span></button>
+            
+            <button class="scientific-btn" onclick="appendSqrt()"><span>√</span></button>
+            <button class="scientific-btn" onclick="appendOperator('**')"><span>x²</span></button>
+            <button class="scientific-btn" onclick="appendPower()"><span>x^y</span></button>
+            <button class="scientific-btn" onclick="appendConstant('pi')"><span>π</span></button>
+            <button class="scientific-btn" onclick="appendConstant('e')"><span>e</span></button>
+            
+            <button class="scientific-btn" onclick="appendParenthesis('(')"><span>(</span></button>
+            <button class="scientific-btn" onclick="appendParenthesis(')')"><span>)</span></button>
+            <button class="clear" onclick="clearDisplay()"><span>C</span></button>
+            <button class="clear" onclick="clearEntry()"><span>CE</span></button>
+            <button class="operator" onclick="appendOperator('/')"><span>÷</span></button>
+            
+            <button onclick="appendNumber('7')"><span>7</span></button>
+            <button onclick="appendNumber('8')"><span>8</span></button>
+            <button onclick="appendNumber('9')"><span>9</span></button>
+            <button class="operator" onclick="appendOperator('*')"><span>×</span></button>
+            <button class="operator" onclick="appendOperator('-')"><span>−</span></button>
+            
+            <button onclick="appendNumber('4')"><span>4</span></button>
+            <button onclick="appendNumber('5')"><span>5</span></button>
+            <button onclick="appendNumber('6')"><span>6</span></button>
+            <button class="operator" onclick="appendOperator('+')"><span>+</span></button>
+            <button class="operator" onclick="appendOperator('**')" style="font-size: 1.2rem;"><span>x²</span></button>
+            
+            <button onclick="appendNumber('1')"><span>1</span></button>
+            <button onclick="appendNumber('2')"><span>2</span></button>
+            <button onclick="appendNumber('3')"><span>3</span></button>
+            <button onclick="appendNumber('0')"><span>0</span></button>
+            <button onclick="appendDecimal()"><span>.</span></button>
+            
+            <button class="equals" onclick="calculate()" style="grid-column: span 5;"><span>=</span></button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let currentInput = '0';
+        let shouldResetDisplay = false;
+        let history = JSON.parse(localStorage.getItem('calculatorHistory')) || [];
+        let lastExpression = '';
+        
+        // 模式状态管理
+        let calculatorMode = localStorage.getItem('calculatorMode') || 'simple';
+        
+        // 点击数据统计系统
+        let clickStats = JSON.parse(localStorage.getItem('calculatorClickStats')) || {};
+        
+        // 记录按钮点击
+        function trackButtonClick(buttonName, buttonType = 'normal') {
+            const timestamp = new Date().toISOString();
+            
+            if (!clickStats[buttonName]) {
+                clickStats[buttonName] = {
+                    count: 0,
+                    type: buttonType,
+                    firstClick: timestamp,
+                    lastClick: timestamp,
+                    clicks: []
+                };
+            }
+            
+            clickStats[buttonName].count++;
+            clickStats[buttonName].lastClick = timestamp;
+            clickStats[buttonName].clicks.push({
+                time: timestamp,
+                date: new Date().toLocaleDateString('zh-CN')
+            });
+            
+            // 限制存储的点击记录数量（避免占用过多空间）
+            if (clickStats[buttonName].clicks.length > 1000) {
+                clickStats[buttonName].clicks = clickStats[buttonName].clicks.slice(-1000);
+            }
+            
+            // 保存到 localStorage
+            localStorage.setItem('calculatorClickStats', JSON.stringify(clickStats));
+        }
+        
+        // 获取统计数据
+        function getClickStats() {
+            return clickStats;
+        }
+        
+        // 清除统计数据
+        function clearClickStats() {
+            if (confirm('确定要清除所有点击统计数据吗？')) {
+                clickStats = {};
+                localStorage.removeItem('calculatorClickStats');
+                if (typeof renderStats !== 'undefined') {
+                    renderStats();
+                }
+            }
+        }
+
+        // 音效系统
+        let audioContext = null;
+        
+        // 初始化音频上下文（需要用户交互后才能创建）
+        function initAudioContext() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('音频上下文创建失败:', e);
+                }
+            }
+            return audioContext;
+        }
+
+        // 播放音效
+        function playSound(frequency, duration, type = 'sine', volume = 0.3) {
+            const ctx = initAudioContext();
+            if (!ctx) return;
+
+            try {
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                oscillator.type = type;
+                oscillator.frequency.value = frequency;
+
+                gainNode.gain.setValueAtTime(0, ctx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + duration);
+            } catch (e) {
+                console.log('音效播放失败:', e);
+            }
+        }
+
+        // 不同按钮类型的音效
+        const sounds = {
+            number: (num) => {
+                // 根据数字播放不同音调（C大调音阶）
+                const frequencies = {
+                    '0': 261.63, // C4
+                    '1': 293.66, // D4
+                    '2': 329.63, // E4
+                    '3': 349.23, // F4
+                    '4': 392.00, // G4
+                    '5': 440.00, // A4
+                    '6': 493.88, // B4
+                    '7': 523.25, // C5
+                    '8': 587.33, // D5
+                    '9': 659.25  // E5
+                };
+                const freq = frequencies[num] || 400;
+                playSound(freq, 0.1, 'sine', 0.2);
+            },
+            operator: () => playSound(600, 0.15, 'sine', 0.25), // 运算符：中音
+            equals: () => {
+                // 等号：上升音调，更悦耳
+                playSound(523.25, 0.08, 'sine', 0.2); // C5
+                setTimeout(() => playSound(659.25, 0.1, 'sine', 0.25), 60); // E5
+                setTimeout(() => playSound(783.99, 0.12, 'sine', 0.3), 120); // G5
+            },
+            clear: () => playSound(300, 0.2, 'sawtooth', 0.3),  // 清除：低沉的音调
+            decimal: () => playSound(450, 0.1, 'sine', 0.2),     // 小数点：稍高音调
+            history: () => playSound(550, 0.15, 'sine', 0.25),  // 历史按钮：中高音
+            close: () => playSound(250, 0.2, 'sawtooth', 0.3)    // 关闭：低音
+        };
+
+        // 模式切换函数
+        function toggleMode() {
+            trackButtonClick('模式切换', 'history');
+            calculatorMode = calculatorMode === 'simple' ? 'scientific' : 'simple';
+            localStorage.setItem('calculatorMode', calculatorMode);
+            updateModeDisplay();
+            updateButtonVisibility();
+            sounds.history();
+        }
+        
+        // 更新模式显示
+        function updateModeDisplay() {
+            const modeBtn = document.getElementById('modeBtn');
+            if (modeBtn) {
+                const btnSpan = modeBtn.querySelector('span');
+                if (btnSpan) {
+                    btnSpan.textContent = calculatorMode === 'simple' ? '🔬 科学模式' : '🔢 简单模式';
+                }
+            }
+        }
+        
+        // 更新按钮可见性
+        function updateButtonVisibility() {
+            const simpleButtons = document.getElementById('simple-buttons');
+            const scientificButtons = document.getElementById('scientific-buttons');
+            
+            if (calculatorMode === 'simple') {
+                if (simpleButtons) simpleButtons.style.display = 'grid';
+                if (scientificButtons) scientificButtons.style.display = 'none';
+            } else {
+                if (simpleButtons) simpleButtons.style.display = 'none';
+                if (scientificButtons) scientificButtons.style.display = 'grid';
+            }
+        }
+        
+        // 加载时显示历史记录和初始化模式
+        window.addEventListener('DOMContentLoaded', function() {
+            renderHistory();
+            updateModeDisplay();
+            updateButtonVisibility();
+            adjustDisplayFontSize(); // 初始化字体大小
+            // 预初始化音频上下文（需要用户交互）
+            document.addEventListener('click', function initAudio() {
+                initAudioContext();
+                document.removeEventListener('click', initAudio);
+            }, { once: true });
+        });
+        
+        // 窗口大小改变时调整字体
+        window.addEventListener('resize', function() {
+            adjustDisplayFontSize();
+        });
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+            adjustDisplayFontSize();
+        }
+        
+        // 根据内容长度动态调整显示字体大小
+        function adjustDisplayFontSize() {
+            const displayElement = document.getElementById('display');
+            if (!displayElement) return;
+            
+            const text = currentInput;
+            const maxLength = 12; // 最大字符数，超过后开始缩小字体
+            const baseSize = 2.5; // rem 基础字体大小
+            const minSize = 1.2; // rem 最小字体大小
+            
+            // 如果文本长度超过阈值，动态调整字体大小
+            if (text.length > maxLength) {
+                // 计算合适的字体大小
+                const scaleFactor = Math.max(minSize / baseSize, maxLength / text.length);
+                const newSize = Math.max(minSize, baseSize * scaleFactor);
+                displayElement.style.fontSize = newSize + 'rem';
+            } else {
+                // 恢复默认字体大小
+                displayElement.style.fontSize = baseSize + 'rem';
+            }
+        }
+
+        function appendNumber(number) {
+            trackButtonClick(`数字-${number}`, 'number');
+            sounds.number(number);
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            if (currentInput === '0') {
+                currentInput = number;
+            } else {
+                currentInput += number;
+            }
+            updateDisplay();
+        }
+
+        function appendDecimal() {
+            trackButtonClick('小数点', 'decimal');
+            sounds.decimal();
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            if (!currentInput.includes('.')) {
+                currentInput += '.';
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(operator) {
+            const operatorNames = {
+                '+': '加号',
+                '-': '减号',
+                '*': '乘号',
+                '/': '除号',
+                '**': '平方'
+            };
+            trackButtonClick(`运算符-${operatorNames[operator] || operator}`, 'operator');
+            sounds.operator();
+            if (shouldResetDisplay) {
+                shouldResetDisplay = false;
+            }
+            
+            // 如果最后一个是运算符，替换它
+            const lastChar = currentInput[currentInput.length - 1];
+            if (['+', '-', '*', '/', '**'].includes(lastChar) || lastChar === '×' || lastChar === '÷') {
+                currentInput = currentInput.slice(0, -1);
+            }
+            
+            // 将显示的运算符转换为实际运算符
+            if (operator === '×') {
+                currentInput += '*';
+            } else if (operator === '÷') {
+                currentInput += '/';
+            } else {
+                currentInput += operator;
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            trackButtonClick('等号', 'equals');
+            sounds.equals();
+            try {
+                // 清理输入，移除末尾的运算符
+                let expression = currentInput.replace(/[+\-*/**]+$/, '');
+                lastExpression = expression;
+                
+                // 转换科学函数为 JavaScript Math 函数
+                expression = convertScientificFunctions(expression);
+                
+                // 安全地计算表达式
+                const result = Function('"use strict"; return (' + expression + ')')();
+                
+                // 处理结果
+                if (isNaN(result) || !isFinite(result)) {
+                    currentInput = '错误';
+                } else {
+                    // 保留最多10位小数，去除末尾的0
+                    const formattedResult = parseFloat(result.toFixed(10)).toString();
+                    
+                    // 保存历史记录（使用原始输入，不是转换后的表达式）
+                    addToHistory(currentInput, formattedResult);
+                    
+                    currentInput = formattedResult;
+                }
+                shouldResetDisplay = true;
+                updateDisplay();
+            } catch (error) {
+                currentInput = '错误';
+                shouldResetDisplay = true;
+                updateDisplay();
+            }
+        }
+        
+        // 转换科学函数为 JavaScript Math 函数
+        function convertScientificFunctions(expression) {
+            // 替换科学函数
+            expression = expression.replace(/sin\(/g, 'Math.sin(');
+            expression = expression.replace(/cos\(/g, 'Math.cos(');
+            expression = expression.replace(/tan\(/g, 'Math.tan(');
+            expression = expression.replace(/log\(/g, 'Math.log10(');
+            expression = expression.replace(/ln\(/g, 'Math.log(');
+            expression = expression.replace(/sqrt\(/g, 'Math.sqrt(');
+            
+            // 处理角度单位（默认使用弧度，如果需要度数可以在这里转换）
+            // 当前实现使用弧度，这是 JavaScript Math 函数的默认行为
+            
+            return expression;
+        }
+
+        function addToHistory(expression, result) {
+            // 格式化表达式用于显示
+            let displayExpression = expression
+                .replace(/\*/g, '×')
+                .replace(/\//g, '÷')
+                .replace(/\*\*/g, '^')
+                .replace(/Math\./g, ''); // 移除 Math. 前缀以便显示
+            
+            const historyItem = {
+                expression: displayExpression,
+                result: result,
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+            
+            history.unshift(historyItem); // 添加到开头
+            
+            // 限制历史记录数量为50条
+            if (history.length > 50) {
+                history = history.slice(0, 50);
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('calculatorHistory', JSON.stringify(history));
+            
+            // 更新显示
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="history-empty">暂无历史记录</div>';
+                return;
+            }
+            
+            historyList.innerHTML = history.map((item, index) => {
+                return `
+                <div class="history-item" data-result="${escapeHtml(item.result)}">
+                    <div class="history-expression">${escapeHtml(item.expression)}</div>
+                    <div class="history-result">= ${escapeHtml(item.result)}</div>
+                    <div style="font-size: 0.75rem; color: #999; margin-top: 5px;">${escapeHtml(item.timestamp)}</div>
+                </div>
+            `;
+            }).join('');
+            
+            // 为每个历史记录项添加点击事件
+            historyList.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    useHistoryResult(this.getAttribute('data-result'));
+                });
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function useHistoryResult(result) {
+            trackButtonClick('使用历史结果', 'history');
+            sounds.number('5'); // 使用中间音调
+            currentInput = result;
+            shouldResetDisplay = true;
+            updateDisplay();
+            closeHistory();
+        }
+
+        function toggleHistory() {
+            trackButtonClick('历史记录', 'history');
+            sounds.history();
+            const panel = document.getElementById('historyPanel');
+            const overlay = document.getElementById('overlay');
+            
+            if (panel.classList.contains('show')) {
+                closeHistory();
+            } else {
+                panel.classList.add('show');
+                overlay.classList.add('show');
+            }
+        }
+
+        function closeHistory() {
+            trackButtonClick('关闭历史', 'close');
+            sounds.close();
+            const panel = document.getElementById('historyPanel');
+            const overlay = document.getElementById('overlay');
+            panel.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+
+        function clearHistory() {
+            trackButtonClick('清除历史', 'clear');
+            sounds.clear();
+            if (confirm('确定要清除所有历史记录吗？')) {
+                history = [];
+                localStorage.removeItem('calculatorHistory');
+                renderHistory();
+            }
+        }
+
+        function clearDisplay() {
+            trackButtonClick('清除-C', 'clear');
+            sounds.clear();
+            currentInput = '0';
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        function clearEntry() {
+            trackButtonClick('清除-CE', 'clear');
+            sounds.clear();
+            currentInput = '0';
+            updateDisplay();
+        }
+        
+        // 科学计算函数
+        function appendFunction(funcName) {
+            trackButtonClick(`函数-${funcName}`, 'scientific');
+            sounds.operator();
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            // 如果当前输入是0，替换它；否则追加
+            if (currentInput === '0') {
+                currentInput = funcName + '(';
+            } else {
+                // 检查最后一个字符，如果是数字或右括号，需要添加乘号
+                const lastChar = currentInput[currentInput.length - 1];
+                if (/[0-9\)]/.test(lastChar)) {
+                    currentInput += '*' + funcName + '(';
+                } else {
+                    currentInput += funcName + '(';
+                }
+            }
+            updateDisplay();
+        }
+        
+        function appendConstant(constant) {
+            const constantNames = {
+                'pi': 'π',
+                'e': 'e'
+            };
+            trackButtonClick(`常数-${constantNames[constant] || constant}`, 'scientific');
+            sounds.operator();
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            let value;
+            if (constant === 'pi') {
+                value = Math.PI.toString();
+            } else if (constant === 'e') {
+                value = Math.E.toString();
+            } else {
+                value = constant;
+            }
+            
+            // 如果当前输入是0，替换它；否则追加
+            if (currentInput === '0') {
+                currentInput = value;
+            } else {
+                // 检查最后一个字符，如果是数字或右括号，需要添加乘号
+                const lastChar = currentInput[currentInput.length - 1];
+                if (/[0-9\)]/.test(lastChar)) {
+                    currentInput += '*' + value;
+                } else {
+                    currentInput += value;
+                }
+            }
+            updateDisplay();
+        }
+        
+        function appendSqrt() {
+            trackButtonClick('函数-√', 'scientific');
+            sounds.operator();
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            // 如果当前输入是0，替换它；否则追加
+            if (currentInput === '0') {
+                currentInput = 'sqrt(';
+            } else {
+                // 检查最后一个字符，如果是数字或右括号，需要添加乘号
+                const lastChar = currentInput[currentInput.length - 1];
+                if (/[0-9\)]/.test(lastChar)) {
+                    currentInput += '*sqrt(';
+                } else {
+                    currentInput += 'sqrt(';
+                }
+            }
+            updateDisplay();
+        }
+        
+        function appendPower() {
+            trackButtonClick('运算符-x^y', 'scientific');
+            sounds.operator();
+            if (shouldResetDisplay) {
+                shouldResetDisplay = false;
+            }
+            
+            // 添加幂运算符 **
+            const lastChar = currentInput[currentInput.length - 1];
+            if (['+', '-', '*', '/', '**'].includes(lastChar) || lastChar === '×' || lastChar === '÷') {
+                currentInput = currentInput.slice(0, -1);
+            }
+            currentInput += '**';
+            updateDisplay();
+        }
+        
+        function appendParenthesis(paren) {
+            trackButtonClick(`括号-${paren}`, 'scientific');
+            sounds.operator();
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            if (currentInput === '0' && paren === '(') {
+                currentInput = '(';
+            } else if (currentInput === '0' && paren === ')') {
+                // 右括号不能作为第一个字符
+                return;
+            } else {
+                currentInput += paren;
+            }
+            updateDisplay();
+        }
+
+        // 键盘支持
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+            
+            if (key >= '0' && key <= '9') {
+                appendNumber(key);
+            } else if (key === '.') {
+                appendDecimal();
+            } else if (key === '+') {
+                appendOperator('+');
+            } else if (key === '-') {
+                appendOperator('-');
+            } else if (key === '*') {
+                appendOperator('*');
+            } else if (key === '/') {
+                event.preventDefault();
+                appendOperator('/');
+            } else if (key === 'Enter' || key === '=') {
+                calculate();
+            } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                clearDisplay();
+            } else if (key === 'Backspace') {
+                trackButtonClick('退格键', 'clear');
+                sounds.clear();
+                if (currentInput.length > 1) {
+                    currentInput = currentInput.slice(0, -1);
+                } else {
+                    currentInput = '0';
+                }
+                updateDisplay();
+            }
+        });
+        
+        // 统计面板功能
+        function toggleStats() {
+            trackButtonClick('点击统计', 'history');
+            sounds.history();
+            const panel = document.getElementById('statsPanel');
+            const overlay = document.getElementById('overlay');
+            
+            if (panel.classList.contains('show')) {
+                closeStats();
+            } else {
+                panel.classList.add('show');
+                overlay.classList.add('show');
+                renderStats();
+            }
+        }
+        
+        function closeStats() {
+            trackButtonClick('关闭统计', 'close');
+            sounds.close();
+            const panel = document.getElementById('statsPanel');
+            const overlay = document.getElementById('overlay');
+            panel.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+        
+        function renderStats() {
+            const statsList = document.getElementById('statsList');
+            const stats = getClickStats();
+            
+            if (Object.keys(stats).length === 0) {
+                statsList.innerHTML = '<div class="history-empty">暂无统计数据</div>';
+                return;
+            }
+            
+            // 按点击次数排序
+            const sortedStats = Object.entries(stats).sort((a, b) => b[1].count - a[1].count);
+            
+            // 计算最大点击次数（用于显示百分比条）
+            const maxCount = Math.max(...sortedStats.map(([_, data]) => data.count));
+            
+            statsList.innerHTML = sortedStats.map(([buttonName, data]) => {
+                const percentage = maxCount > 0 ? (data.count / maxCount) * 100 : 0;
+                return `
+                    <div class="stats-item">
+                        <div class="stats-item-header">
+                            <div class="stats-button-name">${escapeHtml(buttonName)}</div>
+                            <div class="stats-count">${data.count}</div>
+                        </div>
+                        <div class="stats-details">
+                            类型: ${data.type} | 
+                            首次点击: ${new Date(data.firstClick).toLocaleString('zh-CN')} | 
+                            最后点击: ${new Date(data.lastClick).toLocaleString('zh-CN')}
+                        </div>
+                        <div class="stats-bar">
+                            <div class="stats-bar-fill" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
